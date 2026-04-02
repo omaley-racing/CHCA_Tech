@@ -28,9 +28,10 @@
           <div>
             <h2>How this prototype works</h2>
             <p>
-              Drivers or owners enter their information first. Selecting a class loads the
-              matching inspection checklist and signoff items. The final payload is ready to
-              connect to Google Sheets, PDF generation, and email delivery.
+              Move through the form with the Next buttons: Driver / Owner Information first, then
+              Inspection Information, then the class-specific sections, and finally signoff and
+              submission. The final payload is ready to connect to Google Sheets, PDF generation,
+              and email delivery.
             </p>
           </div>
           <div class="status-card" id="statusCard">
@@ -43,10 +44,65 @@
         </section>
 
         <form id="inspectionForm" class="inspection-form">
-          <section class="panel">
+          <section class="panel" id="driverOwnerPanel" data-step="1">
             <div class="section-heading">
-              <h2>Inspection Setup</h2>
-              <p>Basic race-weekend information used across all classes.</p>
+              <p class="step-label">Step 1</p>
+              <h2>Driver / Owner Information</h2>
+              <p>Start with the core contact details for the inspection record and email routing.</p>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Driver Name</span>
+                <input type="text" name="driverName" required />
+              </label>
+
+              <label>
+                <span>Driver Email</span>
+                <input type="email" name="driverEmail" required />
+              </label>
+
+              <label>
+                <span>Driver Phone</span>
+                <input type="tel" name="driverPhone" required />
+              </label>
+
+              <label>
+                <span>Owner Name</span>
+                <input type="text" name="ownerName" required />
+              </label>
+
+              <label>
+                <span>Owner Email</span>
+                <input type="email" name="ownerEmail" required />
+              </label>
+
+              <label>
+                <span>Owner Phone</span>
+                <input type="tel" name="ownerPhone" required />
+              </label>
+
+              <label class="full-width">
+                <span>Make / Model / Year</span>
+                <input type="text" name="vehicleDescription" placeholder="Example: 1978 Camaro" required />
+              </label>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="sameAsDriver" name="sameAsDriver" />
+              <span>Driver is also the owner</span>
+            </label>
+
+            <div class="step-actions step-actions-end">
+              <button type="button" class="primary-button" data-step-next="1">Next: Inspection Information</button>
+            </div>
+          </section>
+
+          <section class="panel" id="inspectionInfoPanel" data-step="2" hidden>
+            <div class="section-heading">
+              <p class="step-label">Step 2</p>
+              <h2>Inspection Information</h2>
+              <p>Once the contact section is complete, enter the race-weekend inspection details.</p>
             </div>
 
             <div class="grid two-up">
@@ -87,54 +143,16 @@
                 <input type="text" name="carNumber" placeholder="Car #" required />
               </label>
             </div>
-          </section>
 
-          <section class="panel">
-            <div class="section-heading">
-              <h2>Driver / Owner Information</h2>
-              <p>Core contact details for the inspection record, sheet export, and email routing.</p>
-            </div>
-
-            <div class="grid two-up">
-              <label>
-                <span>Driver Name</span>
-                <input type="text" name="driverName" required />
-              </label>
-
-              <label>
-                <span>Driver Email</span>
-                <input type="email" name="driverEmail" required />
-              </label>
-
-              <label>
-                <span>Driver Phone</span>
-                <input type="tel" name="driverPhone" />
-              </label>
-
-              <label>
-                <span>Owner Name</span>
-                <input type="text" name="ownerName" />
-              </label>
-
-              <label>
-                <span>Owner Email</span>
-                <input type="email" name="ownerEmail" />
-              </label>
-
-              <label>
-                <span>Owner Phone</span>
-                <input type="tel" name="ownerPhone" />
-              </label>
-
-              <label class="full-width">
-                <span>Make / Model / Year</span>
-                <input type="text" name="vehicleDescription" placeholder="Example: 1978 Camaro" required />
-              </label>
+            <div class="step-actions">
+              <button type="button" class="secondary-button" data-step-back="2">Back</button>
+              <button type="button" class="primary-button" data-step-next="2">Next: Class Sections</button>
             </div>
           </section>
 
-          <section class="panel" id="classDetailsPanel" hidden>
+          <section class="panel" id="classDetailsPanel" data-step="3" hidden>
             <div class="section-heading">
+              <p class="step-label">Step 3</p>
               <h2>Class-Specific Details</h2>
               <p id="classDetailsHint">Additional fields will appear here for the selected class.</p>
             </div>
@@ -142,7 +160,7 @@
             <div id="classSpecificFields" class="grid two-up"></div>
           </section>
 
-          <section class="panel">
+          <section class="panel" id="checklistPanel" data-step="3" hidden>
             <div class="section-heading">
               <h2>Checklist</h2>
               <p id="checklistHint">Choose a class above to load the required inspection items.</p>
@@ -151,10 +169,16 @@
             <div id="dynamicChecklist" class="dynamic-checklist empty-state">
               <p>No class selected yet.</p>
             </div>
+
+            <div class="step-actions">
+              <button type="button" class="secondary-button" data-step-back="3">Back</button>
+              <button type="button" class="primary-button" data-step-next="3">Next: Result and Signoff</button>
+            </div>
           </section>
 
-          <section class="panel">
+          <section class="panel" id="resultPanel" data-step="4" hidden>
             <div class="section-heading">
+              <p class="step-label">Step 4</p>
               <h2>Result and Signoff</h2>
               <p>Final outcome, corrections, and sticker/signature tracking.</p>
             </div>
@@ -213,7 +237,7 @@
             </div>
           </section>
 
-          <section class="panel action-panel">
+          <section class="panel action-panel" id="submitPanel" data-step="4" hidden>
             <div class="action-copy">
               <h2>Submit</h2>
               <p>
@@ -224,6 +248,9 @@
             </div>
 
             <div class="button-row">
+              <button type="button" class="secondary-button" data-step-back="4">
+                Back
+              </button>
               <button type="button" id="previewPayloadButton" class="secondary-button">
                 Preview Submission Payload
               </button>
@@ -232,7 +259,7 @@
           </section>
         </form>
 
-        <section class="panel preview-panel">
+        <section class="panel preview-panel" id="previewPanel" data-step="4" hidden>
           <div class="section-heading">
             <h2>Submission Preview</h2>
             <p>Useful while the backend is still being wired up.</p>

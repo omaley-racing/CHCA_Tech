@@ -7,22 +7,90 @@ const checklistHint = document.getElementById("checklistHint");
 const payloadPreview = document.getElementById("payloadPreview");
 const previewPayloadButton = document.getElementById("previewPayloadButton");
 const statusCard = document.getElementById("statusCard");
+const sameAsDriverCheckbox = document.getElementById("sameAsDriver");
 const classDetailsPanel = document.getElementById("classDetailsPanel");
 const classDetailsHint = document.getElementById("classDetailsHint");
 const classSpecificFields = document.getElementById("classSpecificFields");
+const wizardPanels = Array.from(document.querySelectorAll("[data-step]"));
+const nextButtons = Array.from(document.querySelectorAll("[data-step-next]"));
+const backButtons = Array.from(document.querySelectorAll("[data-step-back]"));
+const finalStep = 4;
+const ownerFieldNames = ["ownerName", "ownerEmail", "ownerPhone"];
+const ownerFieldMap = {
+  ownerName: "driverName",
+  ownerEmail: "driverEmail",
+  ownerPhone: "driverPhone",
+};
+
+let currentStep = 1;
 
 populateClassOptions();
 setDefaultDate();
+syncOwnerFields();
+renderChecklist(classSelect.value);
+renderWizardStep();
 renderPayloadPreview();
 
 classSelect.addEventListener("change", () => {
   renderChecklist(classSelect.value);
+  renderWizardStep();
   renderPayloadPreview();
 });
 
 form.addEventListener("input", renderPayloadPreview);
+form.addEventListener("change", renderPayloadPreview);
 previewPayloadButton.addEventListener("click", renderPayloadPreview);
 form.addEventListener("submit", handleSubmit);
+sameAsDriverCheckbox.addEventListener("change", handleSameAsDriverChange);
+nextButtons.forEach((button) => {
+  button.addEventListener("click", () => goToNextStep(Number(button.dataset.stepNext)));
+});
+backButtons.forEach((button) => {
+  button.addEventListener("click", () => goToPreviousStep(Number(button.dataset.stepBack)));
+});
+
+["driverName", "driverEmail", "driverPhone"].forEach((fieldName) => {
+  form.elements[fieldName].addEventListener("input", () => {
+    if (sameAsDriverCheckbox.checked) {
+      syncOwnerFields();
+      renderPayloadPreview();
+    }
+  });
+});
+
+function goToNextStep(step) {
+  if (!validateStep(step)) {
+    return;
+  }
+
+  currentStep = Math.min(finalStep, step + 1);
+  renderWizardStep({ scroll: true });
+}
+
+function goToPreviousStep(step) {
+  currentStep = Math.max(1, step - 1);
+  renderWizardStep({ scroll: true });
+}
+
+function handleSameAsDriverChange() {
+  syncOwnerFields();
+  renderPayloadPreview();
+}
+
+function syncOwnerFields() {
+  const ownerIsDriver = sameAsDriverCheckbox.checked;
+
+  ownerFieldNames.forEach((ownerFieldName) => {
+    const ownerField = form.elements[ownerFieldName];
+    const driverField = form.elements[ownerFieldMap[ownerFieldName]];
+
+    if (ownerIsDriver) {
+      ownerField.value = driverField.value;
+    }
+
+    ownerField.readOnly = ownerIsDriver;
+  });
+}
 
 function populateClassOptions() {
   classes.forEach((vehicleClass) => {
@@ -80,12 +148,10 @@ function renderClassSpecificFields(selectedClass) {
   classSpecificFields.innerHTML = "";
 
   if (!selectedClass || !selectedClass.extraFields || selectedClass.extraFields.length === 0) {
-    classDetailsPanel.hidden = true;
     classDetailsHint.textContent = "Additional fields will appear here for the selected class.";
     return;
   }
 
-  classDetailsPanel.hidden = false;
   classDetailsHint.textContent = `${selectedClass.label} requires ${selectedClass.extraFields.length} additional field(s).`;
 
   selectedClass.extraFields.forEach((field) => {
@@ -159,6 +225,55 @@ function createChecklistItem(sectionIndex, itemIndex, itemLabel) {
   `;
 
   return itemCard;
+}
+
+function hasClassSpecificFields() {
+  const selectedClass = classes.find((vehicleClass) => vehicleClass.id === classSelect.value);
+  return Boolean(selectedClass?.extraFields?.length);
+}
+
+function getPanelsForStep(step) {
+  return wizardPanels.filter((panel) => Number(panel.dataset.step) === step);
+}
+
+function getVisiblePanelsForStep(step) {
+  return getPanelsForStep(step).filter((panel) => !panel.hidden);
+}
+
+function renderWizardStep({ scroll = false } = {}) {
+  wizardPanels.forEach((panel) => {
+    const panelStep = Number(panel.dataset.step);
+    const isCurrentStep = panelStep === currentStep;
+    const shouldShowClassDetails = currentStep === 3 && hasClassSpecificFields();
+
+    if (panel === classDetailsPanel) {
+      panel.hidden = !(isCurrentStep && shouldShowClassDetails);
+      return;
+    }
+
+    panel.hidden = !isCurrentStep;
+  });
+
+  if (scroll) {
+    const firstVisiblePanel = getVisiblePanelsForStep(currentStep)[0];
+    firstVisiblePanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function validateStep(step) {
+  const visiblePanels = getVisiblePanelsForStep(step);
+
+  for (const panel of visiblePanels) {
+    const fields = panel.querySelectorAll("input, select, textarea");
+
+    for (const field of fields) {
+      if (!field.reportValidity()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 function serializeFormBasics() {
@@ -250,6 +365,11 @@ function renderPayloadPreview() {
 
 async function handleSubmit(event) {
   event.preventDefault();
+
+  if (!validateStep(finalStep)) {
+    return;
+  }
+
   const payload = buildPayload();
 
   if (!payload.inspection.vehicleClass) {
