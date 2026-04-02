@@ -201,14 +201,6 @@ function createChecklistItem(sectionIndex, itemIndex, itemLabel) {
   itemCard.innerHTML = `
     <div class="item-title">${itemLabel}</div>
     <div class="item-grid">
-      <label>
-        <span class="mini-label">Measured / Verified</span>
-        <input type="text" name="${key}__verifiedValue" placeholder="Value or verification" />
-      </label>
-      <label>
-        <span class="mini-label">Notes</span>
-        <input type="text" name="${key}__notes" placeholder="Optional notes" />
-      </label>
       <fieldset>
         <legend class="mini-label">Result</legend>
         <div class="pill-group">
@@ -217,6 +209,10 @@ function createChecklistItem(sectionIndex, itemIndex, itemLabel) {
           <label><input type="radio" name="${key}__status" value="N/A" /><span>N/A</span></label>
         </div>
       </fieldset>
+      <label>
+        <span class="mini-label">Notes</span>
+        <input type="text" name="${key}__notes" placeholder="Optional notes" />
+      </label>
       <label>
         <span class="mini-label">Required Follow-Up</span>
         <input type="text" name="${key}__followUp" placeholder="Needed correction or check" />
@@ -347,7 +343,6 @@ function buildPayload() {
               const prefix = `s${sectionIndex}i${itemIndex}`;
               return {
                 label: itemLabel,
-                measuredOrVerified: form.elements[`${prefix}__verifiedValue`]?.value || "",
                 status: form.elements[`${prefix}__status`]?.value || "",
                 notes: form.elements[`${prefix}__notes`]?.value || "",
                 followUp: form.elements[`${prefix}__followUp`]?.value || "",
