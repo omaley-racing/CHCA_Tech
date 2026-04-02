@@ -1,0 +1,17 @@
+{
+  "name": "tech-2026",
+  "version": "1.0.0",
+  "description": "This is a static prototype for a CHCA technical inspection web app that can be hosted on GitHub Pages.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "serve": "^14.2.6"
+  }
+}
