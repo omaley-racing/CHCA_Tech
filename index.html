@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHCA Tech Inspection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">CHCA 2026</p>
+        <h1>Technical Inspection App</h1>
+        <p class="hero-copy">
+          A GitHub Pages-ready inspection form for drivers, owners, and tech officials.
+          Class-specific checks load automatically after the vehicle class is selected.
+        </p>
+      </header>
+
+      <main>
+        <section class="panel intro-panel">
+          <div>
+            <h2>How this prototype works</h2>
+            <p>
+              Drivers or owners enter their information first. Selecting a class loads the
+              matching inspection checklist and signoff items. The final payload is ready to
+              connect to Google Sheets, PDF generation, and email delivery.
+            </p>
+          </div>
+          <div class="status-card" id="statusCard">
+            <strong>Prototype Status</strong>
+            <p>
+              Backend not connected yet. Submissions will be previewed in the browser until an
+              Apps Script endpoint is added.
+            </p>
+          </div>
+        </section>
+
+        <form id="inspectionForm" class="inspection-form">
+          <section class="panel">
+            <div class="section-heading">
+              <h2>Inspection Setup</h2>
+              <p>Basic race-weekend information used across all classes.</p>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Inspection Type</span>
+                <select name="inspectionType" required>
+                  <option value="">Select one</option>
+                  <option>Annual</option>
+                  <option>Event</option>
+                  <option>Re-Tech</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Class</span>
+                <select name="vehicleClass" id="vehicleClass" required>
+                  <option value="">Select a class</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Date</span>
+                <input type="date" name="inspectionDate" required />
+              </label>
+
+              <label>
+                <span>Event</span>
+                <input type="text" name="eventName" placeholder="Race weekend / event name" required />
+              </label>
+
+              <label>
+                <span>Inspector</span>
+                <input type="text" name="inspectorName" placeholder="Inspector name" />
+              </label>
+
+              <label>
+                <span>Car Number</span>
+                <input type="text" name="carNumber" placeholder="Car #" required />
+              </label>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <h2>Driver / Owner Information</h2>
+              <p>Core contact details for the inspection record, sheet export, and email routing.</p>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Driver Name</span>
+                <input type="text" name="driverName" required />
+              </label>
+
+              <label>
+                <span>Driver Email</span>
+                <input type="email" name="driverEmail" required />
+              </label>
+
+              <label>
+                <span>Driver Phone</span>
+                <input type="tel" name="driverPhone" />
+              </label>
+
+              <label>
+                <span>Owner Name</span>
+                <input type="text" name="ownerName" />
+              </label>
+
+              <label>
+                <span>Owner Email</span>
+                <input type="email" name="ownerEmail" />
+              </label>
+
+              <label>
+                <span>Owner Phone</span>
+                <input type="tel" name="ownerPhone" />
+              </label>
+
+              <label class="full-width">
+                <span>Make / Model / Year</span>
+                <input type="text" name="vehicleDescription" placeholder="Example: 1978 Camaro" required />
+              </label>
+            </div>
+          </section>
+
+          <section class="panel" id="classDetailsPanel" hidden>
+            <div class="section-heading">
+              <h2>Class-Specific Details</h2>
+              <p id="classDetailsHint">Additional fields will appear here for the selected class.</p>
+            </div>
+
+            <div id="classSpecificFields" class="grid two-up"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <h2>Checklist</h2>
+              <p id="checklistHint">Choose a class above to load the required inspection items.</p>
+            </div>
+
+            <div id="dynamicChecklist" class="dynamic-checklist empty-state">
+              <p>No class selected yet.</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <h2>Result and Signoff</h2>
+              <p>Final outcome, corrections, and sticker/signature tracking.</p>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Overall Result</span>
+                <select name="overallResult" required>
+                  <option value="">Select one</option>
+                  <option>Pass</option>
+                  <option>Pass with corrections</option>
+                  <option>Fail</option>
+                  <option>Re-Tech required</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Corrections Required Before First Green Flag</span>
+                <input type="text" name="requiredCorrections" />
+              </label>
+
+              <label>
+                <span>Helmet Sticker #</span>
+                <input type="text" name="helmetStickerNumber" />
+              </label>
+
+              <label>
+                <span>HANS Sticker #</span>
+                <input type="text" name="hansStickerNumber" />
+              </label>
+
+              <label>
+                <span>Car Sticker #</span>
+                <input type="text" name="carStickerNumber" />
+              </label>
+
+              <label>
+                <span>Technical Director Email</span>
+                <input type="email" name="techDirectorEmail" placeholder="tech@example.org" />
+              </label>
+
+              <label class="full-width">
+                <span>Inspector Initials / Signature</span>
+                <input type="text" name="inspectorSignature" />
+              </label>
+
+              <label class="full-width">
+                <span>Driver / Owner Signature</span>
+                <input type="text" name="driverOwnerSignature" />
+              </label>
+
+              <label class="full-width">
+                <span>Technical Director Approval</span>
+                <input type="text" name="technicalDirectorApproval" />
+              </label>
+            </div>
+          </section>
+
+          <section class="panel action-panel">
+            <div class="action-copy">
+              <h2>Submit</h2>
+              <p>
+                The current prototype assembles a production-ready JSON payload. Once a Google
+                Apps Script endpoint is configured, this same button can save to Sheets, generate
+                a PDF, and email the Tech Director, Driver, Owner, and club inbox.
+              </p>
+            </div>
+
+            <div class="button-row">
+              <button type="button" id="previewPayloadButton" class="secondary-button">
+                Preview Submission Payload
+              </button>
+              <button type="submit" class="primary-button">Submit Inspection</button>
+            </div>
+          </section>
+        </form>
+
+        <section class="panel preview-panel">
+          <div class="section-heading">
+            <h2>Submission Preview</h2>
+            <p>Useful while the backend is still being wired up.</p>
+          </div>
+          <pre id="payloadPreview">Select a class and fill out the form to preview the submission payload.</pre>
+        </section>
+      </main>
+    </div>
+
+    <script src="./tech-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

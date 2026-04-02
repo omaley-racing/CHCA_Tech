@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0 0 8px;
+      }
+
+      .meta,
+      .section {
+        margin-bottom: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1px solid #cccccc;
+        padding: 6px;
+        vertical-align: top;
+        text-align: left;
+      }
+
+      th {
+        background: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <? var inspection = payload.inspection; ?>
+    <h1><?= inspection.classTitle || "CHCA Technical Inspection" ?></h1>
+
+    <div class="meta">
+      <p><strong>Event:</strong> <?= inspection.eventName || "" ?></p>
+      <p><strong>Date:</strong> <?= inspection.inspectionDate || "" ?></p>
+      <p><strong>Inspection Type:</strong> <?= inspection.inspectionType || "" ?></p>
+      <p><strong>Inspector:</strong> <?= inspection.inspectorName || "" ?></p>
+      <p><strong>Car #:</strong> <?= inspection.carNumber || "" ?></p>
+      <p><strong>Vehicle:</strong> <?= inspection.vehicle?.description || "" ?></p>
+      <p><strong>Driver:</strong> <?= inspection.driver?.name || "" ?> (<?= inspection.driver?.email || "" ?>)</p>
+      <p><strong>Owner:</strong> <?= inspection.owner?.name || "" ?> (<?= inspection.owner?.email || "" ?>)</p>
+    </div>
+
+    <? for (var i = 0; i < inspection.checklist.length; i++) { ?>
+      <div class="section">
+        <h2><?= inspection.checklist[i].sectionTitle ?></h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Inspection Item</th>
+              <th>Measured / Verified</th>
+              <th>Result</th>
+              <th>Notes</th>
+              <th>Follow-Up</th>
+            </tr>
+          </thead>
+          <tbody>
+            <? for (var j = 0; j < inspection.checklist[i].items.length; j++) { ?>
+              <? var item = inspection.checklist[i].items[j]; ?>
+              <tr>
+                <td><?= item.label ?></td>
+                <td><?= item.measuredOrVerified || "" ?></td>
+                <td><?= item.status || "" ?></td>
+                <td><?= item.notes || "" ?></td>
+                <td><?= item.followUp || "" ?></td>
+              </tr>
+            <? } ?>
+          </tbody>
+        </table>
+      </div>
+    <? } ?>
+
+    <div class="section">
+      <h2>Result and Signoff</h2>
+      <p><strong>Overall Result:</strong> <?= inspection.result?.overallResult || "" ?></p>
+      <p><strong>Corrections Required:</strong> <?= inspection.result?.requiredCorrections || "" ?></p>
+      <p><strong>Helmet Sticker #:</strong> <?= inspection.result?.helmetStickerNumber || "" ?></p>
+      <p><strong>HANS Sticker #:</strong> <?= inspection.result?.hansStickerNumber || "" ?></p>
+      <p><strong>Car Sticker #:</strong> <?= inspection.result?.carStickerNumber || "" ?></p>
+      <p><strong>Inspector Signature:</strong> <?= inspection.result?.inspectorSignature || "" ?></p>
+      <p><strong>Technical Director Approval:</strong> <?= inspection.result?.technicalDirectorApproval || "" ?></p>
+    </div>
+  </body>
+</html>
