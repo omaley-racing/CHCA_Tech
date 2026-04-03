@@ -1,7 +1,10 @@
 const CHCA_CONFIG = {
-  sheetId: "PASTE_GOOGLE_SHEET_ID_HERE",
-  sheetName: "Inspections",
-  pdfFolderId: "PASTE_DRIVE_FOLDER_ID_HERE",
+  sheetId: "1_88PXNH1wabxjs448GM_K2YOPGRwrAZvaCQsQF8TAaI",
+  sheetNamesByInspectionType: {
+    Annual: "Annual",
+    "Re-Tech": "Re-Tech",
+  },
+  pdfFolderId: "1p2VRyS4ua0PWmdA6QJ-cHSyoLMQK-RKZ",
   appName: "CHCA Tech Inspection",
 };
 
@@ -10,7 +13,7 @@ function doPost(e) {
     const payload = JSON.parse(e.postData.contents);
     validatePayload_(payload);
 
-    const sheet = getSheet_();
+    const sheet = getSheet_(payload);
     const row = buildSheetRow_(payload);
     sheet.appendRow(row);
 
@@ -46,12 +49,19 @@ function validatePayload_(payload) {
   }
 }
 
-function getSheet_() {
+function getSheet_(payload) {
+  const inspectionType = payload.inspection?.inspectionType || "";
+  const sheetName = CHCA_CONFIG.sheetNamesByInspectionType[inspectionType];
+
+  if (!sheetName) {
+    throw new Error(`No sheet tab is configured for inspection type "${inspectionType}".`);
+  }
+
   const spreadsheet = SpreadsheetApp.openById(CHCA_CONFIG.sheetId);
-  const sheet = spreadsheet.getSheetByName(CHCA_CONFIG.sheetName);
+  const sheet = spreadsheet.getSheetByName(sheetName);
 
   if (!sheet) {
-    throw new Error(`Sheet "${CHCA_CONFIG.sheetName}" not found.`);
+    throw new Error(`Sheet "${sheetName}" not found.`);
   }
 
   return sheet;
@@ -100,10 +110,6 @@ function createPdf_(payload) {
   ].join("-") + ".pdf";
 
   blob.setName(fileName);
-
-  if (!CHCA_CONFIG.pdfFolderId || CHCA_CONFIG.pdfFolderId.indexOf("PASTE_") === 0) {
-    return DriveApp.createFile(blob);
-  }
 
   const folder = DriveApp.getFolderById(CHCA_CONFIG.pdfFolderId);
   return folder.createFile(blob);

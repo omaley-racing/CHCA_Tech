@@ -119,12 +119,13 @@ function renderChecklist(classId) {
     return;
   }
 
+  const checklistSections = getChecklistSections(selectedClass);
   renderClassSpecificFields(selectedClass);
   checklistContainer.className = "dynamic-checklist";
-  checklistHint.textContent = `${selectedClass.summary} ${selectedClass.sections.length} section(s) loaded.`;
+  checklistHint.textContent = `${selectedClass.summary} ${checklistSections.length} personal safety / car section(s) loaded.`;
   checklistContainer.innerHTML = "";
 
-  selectedClass.sections.forEach((section, sectionIndex) => {
+  checklistSections.forEach((section, sectionIndex) => {
     const sectionEl = document.createElement("section");
     sectionEl.className = "check-section";
     sectionEl.innerHTML = `
@@ -136,9 +137,13 @@ function renderChecklist(classId) {
     `;
 
     const itemsWrap = sectionEl.querySelector(".check-items");
-    section.items.forEach((itemLabel, itemIndex) => {
-      itemsWrap.appendChild(createChecklistItem(sectionIndex, itemIndex, itemLabel));
-    });
+    if (section.items.length === 0) {
+      itemsWrap.innerHTML = `<p class="empty-checklist">No ${section.title.toLowerCase()} items defined for ${selectedClass.label}.</p>`;
+    } else {
+      section.items.forEach((itemLabel, itemIndex) => {
+        itemsWrap.appendChild(createChecklistItem(sectionIndex, itemIndex, itemLabel));
+      });
+    }
 
     checklistContainer.appendChild(sectionEl);
   });
@@ -213,14 +218,105 @@ function createChecklistItem(sectionIndex, itemIndex, itemLabel) {
         <span class="mini-label">Notes</span>
         <input type="text" name="${key}__notes" placeholder="Optional notes" />
       </label>
-      <label>
-        <span class="mini-label">Required Follow-Up</span>
-        <input type="text" name="${key}__followUp" placeholder="Needed correction or check" />
-      </label>
     </div>
+    <label class="follow-up-toggle" hidden>
+      <input type="checkbox" name="${key}__requiredFollowUp" />
+      <span>Required Follow-Up</span>
+    </label>
   `;
 
+  const followUpToggle = itemCard.querySelector(".follow-up-toggle");
+  const followUpCheckbox = itemCard.querySelector(`input[name="${key}__requiredFollowUp"]`);
+  const statusInputs = itemCard.querySelectorAll(`input[name="${key}__status"]`);
+
+  statusInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const showFollowUp = input.value === "Fail" && input.checked;
+      followUpToggle.hidden = !showFollowUp;
+
+      if (!showFollowUp) {
+        followUpCheckbox.checked = false;
+      }
+    });
+  });
+
   return itemCard;
+}
+
+function getChecklistSections(selectedClass) {
+  const personalSafetyItems = [];
+  const carItems = [];
+  if (!selectedClass) {
+    return [
+      { title: "Personal Safety", items: personalSafetyItems },
+      { title: "Car", items: carItems },
+    ];
+  }
+
+  selectedClass.sections.forEach((section) => {
+    section.items.forEach((itemLabel) => {
+      if (isPersonalSafetyItem(itemLabel)) {
+        personalSafetyItems.push(itemLabel);
+      } else {
+        carItems.push(itemLabel);
+      }
+    });
+  });
+
+  return [
+    { title: "Personal Safety", items: personalSafetyItems },
+    { title: "Car", items: carItems },
+  ];
+}
+
+function isPersonalSafetyItem(itemLabel) {
+  const normalizedLabel = itemLabel.toLowerCase();
+  const carSafetyKeywords = [
+    "window net",
+    "windows net",
+    "safety net",
+    "seat secure",
+    "seat and belt",
+    "seat installation",
+    "seat belt cutter",
+    "padded headrest",
+    "headrest support",
+    "padding installed",
+    "cage padding",
+    "helmet clearance",
+    "fire suppression",
+    "fire extinguisher",
+    "harnesses compliant",
+    "properly mounted",
+    "mounted per rule",
+    "installed and mounted",
+  ];
+
+  const personalSafetyKeywords = [
+    "helmet",
+    "full-face helmet",
+    "head and neck restraint",
+    "harness",
+    "suit",
+    "gloves",
+    "shoes",
+    "boots",
+    "fire-resistant underwear",
+    "protective gear",
+    "protective apparel",
+    "rider gear",
+    "leathers",
+    "eye / face protection",
+    "neck protection",
+    "chest protector",
+    "arm restraint",
+  ];
+
+  if (carSafetyKeywords.some((keyword) => normalizedLabel.includes(keyword))) {
+    return false;
+  }
+
+  return personalSafetyKeywords.some((keyword) => normalizedLabel.includes(keyword));
 }
 
 function hasClassSpecificFields() {
@@ -337,7 +433,7 @@ function buildPayload() {
       classLabel: selectedClass?.label || "",
       classTitle: selectedClass?.title || "",
       checklist: selectedClass
-        ? selectedClass.sections.map((section, sectionIndex) => ({
+        ? getChecklistSections(selectedClass).map((section, sectionIndex) => ({
             sectionTitle: section.title,
             items: section.items.map((itemLabel, itemIndex) => {
               const prefix = `s${sectionIndex}i${itemIndex}`;
@@ -345,7 +441,7 @@ function buildPayload() {
                 label: itemLabel,
                 status: form.elements[`${prefix}__status`]?.value || "",
                 notes: form.elements[`${prefix}__notes`]?.value || "",
-                followUp: form.elements[`${prefix}__followUp`]?.value || "",
+                requiredFollowUp: form.elements[`${prefix}__requiredFollowUp`]?.checked || false,
               };
             }),
           }))

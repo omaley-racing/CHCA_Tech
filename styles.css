@@ -237,8 +237,30 @@ input[readonly] {
 .item-grid {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: 0.9fr 1.2fr 1.6fr;
+  grid-template-columns: 0.9fr 1.2fr;
   align-items: start;
+}
+
+.empty-checklist {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.follow-up-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+.follow-up-toggle[hidden] {
+  display: none;
+}
+
+.follow-up-toggle input {
+  width: auto;
+  margin: 0;
 }
 
 fieldset {

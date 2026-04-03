@@ -62,10 +62,9 @@
           <thead>
             <tr>
               <th>Inspection Item</th>
-              <th>Measured / Verified</th>
               <th>Result</th>
               <th>Notes</th>
-              <th>Follow-Up</th>
+              <th>Required Follow-Up</th>
             </tr>
           </thead>
           <tbody>
@@ -73,10 +72,9 @@
               <? var item = inspection.checklist[i].items[j]; ?>
               <tr>
                 <td><?= item.label ?></td>
-                <td><?= item.measuredOrVerified || "" ?></td>
                 <td><?= item.status || "" ?></td>
                 <td><?= item.notes || "" ?></td>
-                <td><?= item.followUp || "" ?></td>
+                <td><?= item.requiredFollowUp ? "Yes" : "" ?></td>
               </tr>
             <? } ?>
           </tbody>
@@ -96,3 +94,6 @@
     </div>
   </body>
 </html>
+
+
+

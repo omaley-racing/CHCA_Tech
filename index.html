@@ -111,7 +111,6 @@
                 <select name="inspectionType" required>
                   <option value="">Select one</option>
                   <option>Annual</option>
-                  <option>Event</option>
                   <option>Re-Tech</option>
                 </select>
               </label>
@@ -146,15 +145,15 @@
 
             <div class="step-actions">
               <button type="button" class="secondary-button" data-step-back="2">Back</button>
-              <button type="button" class="primary-button" data-step-next="2">Next: Class Sections</button>
+              <button type="button" class="primary-button" data-step-next="2">Next: Personal Safety / Car</button>
             </div>
           </section>
 
           <section class="panel" id="classDetailsPanel" data-step="3" hidden>
             <div class="section-heading">
               <p class="step-label">Step 3</p>
-              <h2>Class-Specific Details</h2>
-              <p id="classDetailsHint">Additional fields will appear here for the selected class.</p>
+              <h2>Personal Safety / Car</h2>
+              <p id="classDetailsHint">Any class-specific fields will appear here before the safety and car checklist.</p>
             </div>
 
             <div id="classSpecificFields" class="grid two-up"></div>
@@ -162,8 +161,9 @@
 
           <section class="panel" id="checklistPanel" data-step="3" hidden>
             <div class="section-heading">
-              <h2>Checklist</h2>
-              <p id="checklistHint">Choose a class above to load the required inspection items.</p>
+              <p class="step-label">Step 3</p>
+              <h2>Personal Safety / Car Checklist</h2>
+              <p id="checklistHint">Choose a class above to load the required safety and car inspection items.</p>
             </div>
 
             <div id="dynamicChecklist" class="dynamic-checklist empty-state">
