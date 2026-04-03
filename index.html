@@ -18,7 +18,7 @@
         <p class="eyebrow">CHCA 2026</p>
         <h1>Technical Inspection App</h1>
         <p class="hero-copy">
-          A GitHub Pages-ready inspection form for drivers, owners, and tech officials.
+          Digital inspection form for drivers, owners, and tech officials.
           Class-specific checks load automatically after the vehicle class is selected.
         </p>
       </header>
@@ -26,19 +26,18 @@
       <main>
         <section class="panel intro-panel">
           <div>
-            <h2>How this prototype works</h2>
+            <h2>Inspection Workflow</h2>
             <p>
-              Move through the form with the Next buttons: Driver / Owner Information first, then
-              Inspection Information, then the class-specific sections, and finally signoff and
-              submission. The final payload is ready to connect to Google Sheets, PDF generation,
-              and email delivery.
+              Complete the form in order: Driver / Owner Information, Inspection Information,
+              Personal Safety / Car, and final signoff. Submissions are sent to Google Sheets,
+              saved as PDFs, and emailed to recipients after submission.
             </p>
           </div>
           <div class="status-card" id="statusCard">
-            <strong>Prototype Status</strong>
+            <strong>Submission Status</strong>
             <p>
-              Backend not connected yet. Submissions will be previewed in the browser until an
-              Apps Script endpoint is added.
+              Google delivery is connected. Submit the completed inspection to save it, generate
+              the PDF, and email recipients.
             </p>
           </div>
         </section>
@@ -102,7 +101,7 @@
             <div class="section-heading">
               <p class="step-label">Step 2</p>
               <h2>Inspection Information</h2>
-              <p>Once the contact section is complete, enter the race-weekend inspection details.</p>
+              <p>Once the contact section is complete, enter the inspection details.</p>
             </div>
 
             <div class="grid two-up">
@@ -125,11 +124,6 @@
               <label>
                 <span>Date</span>
                 <input type="date" name="inspectionDate" required />
-              </label>
-
-              <label>
-                <span>Event</span>
-                <input type="text" name="eventName" placeholder="Race weekend / event name" required />
               </label>
 
               <label>
@@ -201,16 +195,6 @@
               </label>
 
               <label>
-                <span>Helmet Sticker #</span>
-                <input type="text" name="helmetStickerNumber" />
-              </label>
-
-              <label>
-                <span>HANS Sticker #</span>
-                <input type="text" name="hansStickerNumber" />
-              </label>
-
-              <label>
                 <span>Car Sticker #</span>
                 <input type="text" name="carStickerNumber" />
               </label>
@@ -241,9 +225,8 @@
             <div class="action-copy">
               <h2>Submit</h2>
               <p>
-                The current prototype assembles a production-ready JSON payload. Once a Google
-                Apps Script endpoint is configured, this same button can save to Sheets, generate
-                a PDF, and email the Tech Director, Driver, Owner, and club inbox.
+                Submit the completed inspection to save it to Google Sheets, generate the PDF,
+                and email the Tech Director, Driver, Owner, and club inbox.
               </p>
             </div>
 
@@ -251,21 +234,10 @@
               <button type="button" class="secondary-button" data-step-back="4">
                 Back
               </button>
-              <button type="button" id="previewPayloadButton" class="secondary-button">
-                Preview Submission Payload
-              </button>
               <button type="submit" class="primary-button">Submit Inspection</button>
             </div>
           </section>
         </form>
-
-        <section class="panel preview-panel" id="previewPanel" data-step="4" hidden>
-          <div class="section-heading">
-            <h2>Submission Preview</h2>
-            <p>Useful while the backend is still being wired up.</p>
-          </div>
-          <pre id="payloadPreview">Select a class and fill out the form to preview the submission payload.</pre>
-        </section>
       </main>
     </div>
 

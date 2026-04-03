@@ -327,17 +327,6 @@ button {
   color: var(--ink);
 }
 
-.preview-panel pre {
-  margin: 0;
-  padding: 1rem;
-  border-radius: 18px;
-  background: #101826;
-  color: #dde7f6;
-  overflow: auto;
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
 @media (max-width: 900px) {
   .intro-panel,
   .action-panel,

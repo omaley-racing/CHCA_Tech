@@ -45,7 +45,6 @@
     <h1><?= inspection.classTitle || "CHCA Technical Inspection" ?></h1>
 
     <div class="meta">
-      <p><strong>Event:</strong> <?= inspection.eventName || "" ?></p>
       <p><strong>Date:</strong> <?= inspection.inspectionDate || "" ?></p>
       <p><strong>Inspection Type:</strong> <?= inspection.inspectionType || "" ?></p>
       <p><strong>Inspector:</strong> <?= inspection.inspectorName || "" ?></p>
@@ -86,14 +85,9 @@
       <h2>Result and Signoff</h2>
       <p><strong>Overall Result:</strong> <?= inspection.result?.overallResult || "" ?></p>
       <p><strong>Corrections Required:</strong> <?= inspection.result?.requiredCorrections || "" ?></p>
-      <p><strong>Helmet Sticker #:</strong> <?= inspection.result?.helmetStickerNumber || "" ?></p>
-      <p><strong>HANS Sticker #:</strong> <?= inspection.result?.hansStickerNumber || "" ?></p>
       <p><strong>Car Sticker #:</strong> <?= inspection.result?.carStickerNumber || "" ?></p>
       <p><strong>Inspector Signature:</strong> <?= inspection.result?.inspectorSignature || "" ?></p>
       <p><strong>Technical Director Approval:</strong> <?= inspection.result?.technicalDirectorApproval || "" ?></p>
     </div>
   </body>
 </html>
-
-
-

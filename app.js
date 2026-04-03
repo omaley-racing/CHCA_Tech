@@ -4,8 +4,6 @@ const form = document.getElementById("inspectionForm");
 const classSelect = document.getElementById("vehicleClass");
 const checklistContainer = document.getElementById("dynamicChecklist");
 const checklistHint = document.getElementById("checklistHint");
-const payloadPreview = document.getElementById("payloadPreview");
-const previewPayloadButton = document.getElementById("previewPayloadButton");
 const statusCard = document.getElementById("statusCard");
 const sameAsDriverCheckbox = document.getElementById("sameAsDriver");
 const classDetailsPanel = document.getElementById("classDetailsPanel");
@@ -21,6 +19,70 @@ const ownerFieldMap = {
   ownerEmail: "driverEmail",
   ownerPhone: "driverPhone",
 };
+const CAR_PERSONAL_SAFETY_RULES = [
+  {
+    label: "Helmet meets rule: Snell SA2015+ or FIA 8859-2015+, under 10 years old",
+    matchers: [/helmet/],
+  },
+  {
+    label: "Full-face helmet present if no full windshield",
+    matchers: [/full-face helmet/, /full windshield/],
+  },
+  {
+    label: "Head and neck restraint present: SFI 38.1, within 5-year recert window",
+    matchers: [/head and neck restraint/, /frontal head restraint/, /hans/, /hybrid/],
+  },
+  {
+    label: "Harness is 5-point minimum and current",
+    matchers: [/harness/],
+  },
+  {
+    label: "Suit present: SFI 3-2A or FIA 8856-2000 minimum",
+    matchers: [/suit/, /fire suit/],
+  },
+  {
+    label: "Gloves present",
+    matchers: [/gloves/],
+  },
+  {
+    label: "Shoes / boots present",
+    matchers: [/shoes/, /boots/],
+  },
+];
+const RIDER_PERSONAL_SAFETY_RULES_BY_CLASS = {
+  quad: [
+    {
+      label: "Rider is wearing approved motocross gear or leathers in good condition",
+      matchers: [/motocross gear/, /leathers/, /rider gear/],
+    },
+    {
+      label: "Helmet is worn whenever machine is in motion",
+      matchers: [/helmet is worn/],
+    },
+    {
+      label: "Helmet certification meets approved standard",
+      matchers: [/helmet certification/, /helmet.*approved standard/],
+    },
+    {
+      label: "Required protective gear is present: boots, gloves, eye / face protection, neck protection, and chest protector or approved leather setup",
+      matchers: [/protective gear/, /eye \/ face protection/, /chest protector/],
+    },
+  ],
+  motorcycle: [
+    {
+      label: "Helmet is worn whenever the motorcycle is in motion",
+      matchers: [/helmet is worn/],
+    },
+    {
+      label: "Helmet certification meets approved standard",
+      matchers: [/helmet certification/, /helmet.*approved standard/],
+    },
+    {
+      label: "Required protective apparel is present: boots, gloves, race pants or leathers, eye / face protection, neck protection, and chest protector or approved leather setup",
+      matchers: [/protective apparel/, /eye \/ face protection/, /chest protector/, /leathers/],
+    },
+  ],
+};
 
 let currentStep = 1;
 
@@ -29,17 +91,12 @@ setDefaultDate();
 syncOwnerFields();
 renderChecklist(classSelect.value);
 renderWizardStep();
-renderPayloadPreview();
 
 classSelect.addEventListener("change", () => {
   renderChecklist(classSelect.value);
   renderWizardStep();
-  renderPayloadPreview();
 });
 
-form.addEventListener("input", renderPayloadPreview);
-form.addEventListener("change", renderPayloadPreview);
-previewPayloadButton.addEventListener("click", renderPayloadPreview);
 form.addEventListener("submit", handleSubmit);
 sameAsDriverCheckbox.addEventListener("change", handleSameAsDriverChange);
 nextButtons.forEach((button) => {
@@ -53,7 +110,6 @@ backButtons.forEach((button) => {
   form.elements[fieldName].addEventListener("input", () => {
     if (sameAsDriverCheckbox.checked) {
       syncOwnerFields();
-      renderPayloadPreview();
     }
   });
 });
@@ -74,7 +130,6 @@ function goToPreviousStep(step) {
 
 function handleSameAsDriverChange() {
   syncOwnerFields();
-  renderPayloadPreview();
 }
 
 function syncOwnerFields() {
@@ -115,14 +170,14 @@ function renderChecklist(classId) {
     renderClassSpecificFields(null);
     checklistContainer.className = "dynamic-checklist empty-state";
     checklistContainer.innerHTML = "<p>No class selected yet.</p>";
-    checklistHint.textContent = "Choose a class above to load the required inspection items.";
+    checklistHint.textContent = "Choose a class above to load the required personal safety and car inspection items.";
     return;
   }
 
   const checklistSections = getChecklistSections(selectedClass);
   renderClassSpecificFields(selectedClass);
   checklistContainer.className = "dynamic-checklist";
-  checklistHint.textContent = `${selectedClass.summary} ${checklistSections.length} personal safety / car section(s) loaded.`;
+  checklistHint.textContent = `${selectedClass.summary} ${checklistSections.length} section(s) loaded.`;
   checklistContainer.innerHTML = "";
 
   checklistSections.forEach((section, sectionIndex) => {
@@ -153,11 +208,11 @@ function renderClassSpecificFields(selectedClass) {
   classSpecificFields.innerHTML = "";
 
   if (!selectedClass || !selectedClass.extraFields || selectedClass.extraFields.length === 0) {
-    classDetailsHint.textContent = "Additional fields will appear here for the selected class.";
+    classDetailsHint.textContent = "Class-specific fields appear here only when the selected class requires them.";
     return;
   }
 
-  classDetailsHint.textContent = `${selectedClass.label} requires ${selectedClass.extraFields.length} additional field(s).`;
+  classDetailsHint.textContent = `${selectedClass.label} requires ${selectedClass.extraFields.length} class-specific field(s) before the checklist.`;
 
   selectedClass.extraFields.forEach((field) => {
     const label = document.createElement("label");
@@ -209,9 +264,9 @@ function createChecklistItem(sectionIndex, itemIndex, itemLabel) {
       <fieldset>
         <legend class="mini-label">Result</legend>
         <div class="pill-group">
-          <label><input type="radio" name="${key}__status" value="Pass" /><span>Pass</span></label>
-          <label><input type="radio" name="${key}__status" value="Fail" /><span>Fail</span></label>
-          <label><input type="radio" name="${key}__status" value="N/A" /><span>N/A</span></label>
+          <label><input type="radio" name="${key}__status" value="Pass" required /><span>Pass</span></label>
+          <label><input type="radio" name="${key}__status" value="Fail" required /><span>Fail</span></label>
+          <label><input type="radio" name="${key}__status" value="N/A" required /><span>N/A</span></label>
         </div>
       </fieldset>
       <label>
@@ -263,10 +318,33 @@ function getChecklistSections(selectedClass) {
     });
   });
 
+  const requiredPersonalSafetyRules =
+    RIDER_PERSONAL_SAFETY_RULES_BY_CLASS[selectedClass.id] || CAR_PERSONAL_SAFETY_RULES;
+  const ensuredPersonalSafetyItems = ensureRequiredPersonalSafetyItems(
+    personalSafetyItems,
+    requiredPersonalSafetyRules,
+  );
+
   return [
-    { title: "Personal Safety", items: personalSafetyItems },
+    { title: "Personal Safety", items: ensuredPersonalSafetyItems },
     { title: "Car", items: carItems },
   ];
+}
+
+function ensureRequiredPersonalSafetyItems(items, rules) {
+  const mergedItems = [...items];
+
+  rules.forEach((rule) => {
+    const alreadyPresent = mergedItems.some((item) =>
+      rule.matchers.some((matcher) => matcher.test(item.toLowerCase())),
+    );
+
+    if (!alreadyPresent) {
+      mergedItems.push(rule.label);
+    }
+  });
+
+  return mergedItems;
 }
 
 function isPersonalSafetyItem(itemLabel) {
@@ -381,7 +459,6 @@ function serializeFormBasics() {
   return {
     inspectionType: basic.inspectionType || "",
     inspectionDate: basic.inspectionDate || "",
-    eventName: basic.eventName || "",
     inspectorName: basic.inspectorName || "",
     vehicleClass: basic.vehicleClass || "",
     carNumber: basic.carNumber || "",
@@ -402,8 +479,6 @@ function serializeFormBasics() {
     result: {
       overallResult: basic.overallResult || "",
       requiredCorrections: basic.requiredCorrections || "",
-      helmetStickerNumber: basic.helmetStickerNumber || "",
-      hansStickerNumber: basic.hansStickerNumber || "",
       carStickerNumber: basic.carStickerNumber || "",
       inspectorSignature: basic.inspectorSignature || "",
       driverOwnerSignature: basic.driverOwnerSignature || "",
@@ -425,7 +500,7 @@ function buildPayload() {
   return {
     metadata: {
       generatedAt: new Date().toISOString(),
-      source: "github-pages-prototype",
+      source: "chca-tech-inspection-app",
       schemaVersion: 1,
     },
     inspection: {
@@ -450,10 +525,6 @@ function buildPayload() {
   };
 }
 
-function renderPayloadPreview() {
-  payloadPreview.textContent = JSON.stringify(buildPayload(), null, 2);
-}
-
 async function handleSubmit(event) {
   event.preventDefault();
 
@@ -470,42 +541,35 @@ async function handleSubmit(event) {
   }
 
   if (!config.appsScriptUrl) {
-    payloadPreview.textContent = JSON.stringify(payload, null, 2);
     statusCard.innerHTML = `
-      <strong>Prototype Status</strong>
+      <strong>Submission Error</strong>
       <p>
-        No backend URL is configured yet, so the payload has been assembled locally for review.
-        Add an Apps Script URL in <code>tech-data.js</code> to enable live submission.
+        No submission endpoint is configured. Add the Apps Script web app URL in
+        <code>tech-data.js</code> before using this form live.
       </p>
     `;
     return;
   }
 
-  statusCard.innerHTML = "<strong>Submitting...</strong><p>Sending inspection data to the backend.</p>";
+  statusCard.innerHTML = "<strong>Submitting...</strong><p>Sending inspection data to Google.</p>";
 
   try {
-    const response = await fetch(config.appsScriptUrl, {
+    await fetch(config.appsScriptUrl, {
       method: "POST",
+      mode: "no-cors",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain;charset=utf-8",
       },
       body: JSON.stringify(payload),
     });
-
-    if (!response.ok) {
-      throw new Error(`Submission failed with status ${response.status}`);
-    }
-
-    const result = await response.json().catch(() => ({}));
     statusCard.innerHTML = `
       <strong>Submission Complete</strong>
-      <p>Inspection saved successfully.${result.message ? ` ${result.message}` : ""}</p>
+      <p>Inspection submitted to Google Sheets, PDF generation, and email delivery.</p>
     `;
   } catch (error) {
     statusCard.innerHTML = `
       <strong>Submission Error</strong>
-      <p>${error.message}. The payload is still shown below so nothing is lost.</p>
+      <p>${error.message}. The inspection was not sent to Google.</p>
     `;
-    payloadPreview.textContent = JSON.stringify(payload, null, 2);
   }
 }

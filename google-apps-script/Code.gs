@@ -72,8 +72,9 @@ function buildSheetRow_(payload) {
 
   return [
     new Date(),
-    inspection.eventName || "",
     inspection.inspectionType || "",
+    inspection.result?.overallResult || "",
+    inspection.result?.requiredCorrections || "",
     inspection.classLabel || inspection.vehicleClass || "",
     inspection.carNumber || "",
     inspection.driver?.name || "",
@@ -83,15 +84,10 @@ function buildSheetRow_(payload) {
     inspection.owner?.email || "",
     inspection.owner?.phone || "",
     inspection.vehicle?.description || "",
-    inspection.result?.overallResult || "",
-    inspection.result?.requiredCorrections || "",
-    inspection.result?.helmetStickerNumber || "",
-    inspection.result?.hansStickerNumber || "",
     inspection.result?.carStickerNumber || "",
     inspection.inspectorName || "",
     inspection.result?.inspectorSignature || "",
     inspection.result?.technicalDirectorApproval || "",
-    JSON.stringify(payload),
   ];
 }
 
@@ -104,7 +100,6 @@ function createPdf_(payload) {
   const blob = Utilities.newBlob(html, "text/html", "inspection.html").getAs("application/pdf");
   const fileName = [
     "CHCA-Tech",
-    safeFilePart_(inspection.eventName || "Event"),
     safeFilePart_(inspection.carNumber || "Car"),
     safeFilePart_(inspection.driver?.name || "Driver"),
   ].join("-") + ".pdf";
@@ -132,7 +127,6 @@ function sendEmails_(payload, pdfFile) {
   const body = [
     "A technical inspection has been submitted.",
     "",
-    `Event: ${inspection.eventName || ""}`,
     `Class: ${inspection.classLabel || inspection.vehicleClass || ""}`,
     `Car #: ${inspection.carNumber || ""}`,
     `Driver: ${inspection.driver?.name || ""}`,
@@ -158,3 +152,4 @@ function jsonResponse_(payload) {
 function safeFilePart_(value) {
   return String(value).replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "");
 }
+
