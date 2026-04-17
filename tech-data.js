@@ -1,5 +1,6 @@
 window.CHCATECH = {
   config: {
+    techDirectorEmail: "chcatech07@gmail.com",
     clubEmail: "chcaracingbaord@gmail.com",
     appsScriptUrl: "https://script.google.com/macros/s/AKfycbwZ4fwBSRaWP9qZTAq81CB4QU1sVPvDrInvrFtpTCH-6NO95XvLIbDFLoM5kin0GBiKQw/exec",
   },

@@ -29,6 +29,7 @@ Edit `tech-data.js` and set:
 
 ```js
 config: {
+  techDirectorEmail: "tech.director@example.org",
   clubEmail: "your-club-inbox@example.org",
   appsScriptUrl: "https://script.google.com/macros/s/your-script-id/exec",
 }

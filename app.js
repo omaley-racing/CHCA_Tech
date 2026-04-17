@@ -485,7 +485,7 @@ function serializeFormBasics() {
       technicalDirectorApproval: basic.technicalDirectorApproval || "",
     },
     recipients: {
-      techDirectorEmail: basic.techDirectorEmail || "",
+      techDirectorEmail: config.techDirectorEmail || "",
       clubEmail: config.clubEmail,
       driverEmail: basic.driverEmail || "",
       ownerEmail: basic.ownerEmail || "",

@@ -6,6 +6,7 @@ const CHCA_CONFIG = {
   },
   pdfFolderId: "1p2VRyS4ua0PWmdA6QJ-cHSyoLMQK-RKZ",
   appName: "CHCA Tech Inspection",
+  techDirectorEmail: "chcatech07@gmail.com",
 };
 
 function doPost(e) {
@@ -113,7 +114,7 @@ function createPdf_(payload) {
 function sendEmails_(payload, pdfFile) {
   const inspection = payload.inspection;
   const recipients = [
-    inspection.recipients?.techDirectorEmail,
+    CHCA_CONFIG.techDirectorEmail,
     inspection.recipients?.driverEmail,
     inspection.recipients?.ownerEmail,
     inspection.recipients?.clubEmail,
