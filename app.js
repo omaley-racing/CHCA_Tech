@@ -12,7 +12,10 @@ const classSpecificFields = document.getElementById("classSpecificFields");
 const wizardPanels = Array.from(document.querySelectorAll("[data-step]"));
 const nextButtons = Array.from(document.querySelectorAll("[data-step-next]"));
 const backButtons = Array.from(document.querySelectorAll("[data-step-back]"));
+const submitButton = form.querySelector('button[type="submit"]');
+const wizardButtons = [...nextButtons, ...backButtons, submitButton];
 const finalStep = 4;
+const AUTO_RESET_DELAY_MS = 5000;
 const ownerFieldNames = ["ownerName", "ownerEmail", "ownerPhone"];
 const ownerFieldMap = {
   ownerName: "driverName",
@@ -85,6 +88,8 @@ const RIDER_PERSONAL_SAFETY_RULES_BY_CLASS = {
 };
 
 let currentStep = 1;
+let autoResetTimeoutId = null;
+let countdownIntervalId = null;
 
 populateClassOptions();
 setDefaultDate();
@@ -161,6 +166,68 @@ function setDefaultDate() {
   if (!dateInput.value) {
     dateInput.valueAsDate = new Date();
   }
+}
+
+function setWizardDisabledState(isDisabled) {
+  wizardButtons.forEach((button) => {
+    button.disabled = isDisabled;
+  });
+}
+
+function clearAutoResetTimer() {
+  if (autoResetTimeoutId) {
+    window.clearTimeout(autoResetTimeoutId);
+    autoResetTimeoutId = null;
+  }
+
+  if (countdownIntervalId) {
+    window.clearInterval(countdownIntervalId);
+    countdownIntervalId = null;
+  }
+}
+
+function resetInspectionFlow() {
+  clearAutoResetTimer();
+  form.reset();
+  currentStep = 1;
+  setDefaultDate();
+  syncOwnerFields();
+  renderChecklist(classSelect.value);
+  renderWizardStep({ scroll: true });
+  setWizardDisabledState(false);
+  statusCard.innerHTML = `
+    <strong>Ready for Next Inspection</strong>
+    <p>Form reset complete. Start entering the next car.</p>
+  `;
+}
+
+function scheduleAutoReset() {
+  clearAutoResetTimer();
+
+  const updateCountdownMessage = (secondsRemaining) => {
+    statusCard.innerHTML = `
+      <strong>Submission Complete</strong>
+      <p>
+        Inspection submitted to Google Sheets, PDF generation, and email delivery.
+        Returning to the home screen in ${secondsRemaining} second${secondsRemaining === 1 ? "" : "s"}.
+      </p>
+    `;
+  };
+
+  let secondsRemaining = Math.ceil(AUTO_RESET_DELAY_MS / 1000);
+  updateCountdownMessage(secondsRemaining);
+
+  countdownIntervalId = window.setInterval(() => {
+    secondsRemaining -= 1;
+
+    if (secondsRemaining > 0) {
+      updateCountdownMessage(secondsRemaining);
+    }
+  }, 1000);
+
+  autoResetTimeoutId = window.setTimeout(() => {
+    resetInspectionFlow();
+  }, AUTO_RESET_DELAY_MS);
 }
 
 function renderChecklist(classId) {
@@ -551,6 +618,8 @@ async function handleSubmit(event) {
     return;
   }
 
+  clearAutoResetTimer();
+  setWizardDisabledState(true);
   statusCard.innerHTML = "<strong>Submitting...</strong><p>Sending inspection data to Google.</p>";
 
   try {
@@ -562,11 +631,9 @@ async function handleSubmit(event) {
       },
       body: JSON.stringify(payload),
     });
-    statusCard.innerHTML = `
-      <strong>Submission Complete</strong>
-      <p>Inspection submitted to Google Sheets, PDF generation, and email delivery.</p>
-    `;
+    scheduleAutoReset();
   } catch (error) {
+    setWizardDisabledState(false);
     statusCard.innerHTML = `
       <strong>Submission Error</strong>
       <p>${error.message}. The inspection was not sent to Google.</p>
