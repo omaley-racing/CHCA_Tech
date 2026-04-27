@@ -22,6 +22,10 @@ body {
     linear-gradient(180deg, #f8f3ea 0%, var(--bg) 100%);
 }
 
+body.overlay-open {
+  overflow: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -327,6 +331,56 @@ button {
   color: var(--ink);
 }
 
+.status-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    linear-gradient(180deg, rgba(20, 33, 61, 0.82), rgba(20, 33, 61, 0.88)),
+    radial-gradient(circle at top, rgba(245, 185, 141, 0.18), transparent 35%);
+  backdrop-filter: blur(14px);
+}
+
+.status-overlay[hidden] {
+  display: none;
+}
+
+.status-overlay-card {
+  width: min(680px, 100%);
+  padding: 2.25rem;
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(255, 249, 240, 0.98), rgba(249, 239, 228, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.24);
+  text-align: center;
+}
+
+.status-overlay-eyebrow {
+  margin: 0 0 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.status-overlay-card h2 {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.status-overlay-card p:last-child {
+  margin: 1rem auto 0;
+  max-width: 30rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
 @media (max-width: 900px) {
   .intro-panel,
   .action-panel,
@@ -341,5 +395,10 @@ button {
 
   .hero {
     padding: 2rem;
+  }
+
+  .status-overlay-card {
+    padding: 1.75rem;
+    border-radius: 24px;
   }
 }

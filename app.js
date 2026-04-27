@@ -5,6 +5,10 @@ const classSelect = document.getElementById("vehicleClass");
 const checklistContainer = document.getElementById("dynamicChecklist");
 const checklistHint = document.getElementById("checklistHint");
 const statusCard = document.getElementById("statusCard");
+const statusOverlay = document.getElementById("statusOverlay");
+const statusOverlayEyebrow = document.getElementById("statusOverlayEyebrow");
+const statusOverlayTitle = document.getElementById("statusOverlayTitle");
+const statusOverlayMessage = document.getElementById("statusOverlayMessage");
 const sameAsDriverCheckbox = document.getElementById("sameAsDriver");
 const classDetailsPanel = document.getElementById("classDetailsPanel");
 const classDetailsHint = document.getElementById("classDetailsHint");
@@ -15,7 +19,7 @@ const backButtons = Array.from(document.querySelectorAll("[data-step-back]"));
 const submitButton = form.querySelector('button[type="submit"]');
 const wizardButtons = [...nextButtons, ...backButtons, submitButton];
 const finalStep = 4;
-const AUTO_RESET_DELAY_MS = 5000;
+const AUTO_RESET_DELAY_MS = 10000;
 const ownerFieldNames = ["ownerName", "ownerEmail", "ownerPhone"];
 const ownerFieldMap = {
   ownerName: "driverName",
@@ -174,6 +178,19 @@ function setWizardDisabledState(isDisabled) {
   });
 }
 
+function showStatusOverlay({ eyebrow, title, message }) {
+  statusOverlayEyebrow.textContent = eyebrow;
+  statusOverlayTitle.textContent = title;
+  statusOverlayMessage.textContent = message;
+  statusOverlay.hidden = false;
+  document.body.classList.add("overlay-open");
+}
+
+function hideStatusOverlay() {
+  statusOverlay.hidden = true;
+  document.body.classList.remove("overlay-open");
+}
+
 function clearAutoResetTimer() {
   if (autoResetTimeoutId) {
     window.clearTimeout(autoResetTimeoutId);
@@ -195,6 +212,8 @@ function resetInspectionFlow() {
   renderChecklist(classSelect.value);
   renderWizardStep({ scroll: true });
   setWizardDisabledState(false);
+  hideStatusOverlay();
+  form.elements.driverName?.focus();
   statusCard.innerHTML = `
     <strong>Ready for Next Inspection</strong>
     <p>Form reset complete. Start entering the next car.</p>
@@ -205,13 +224,18 @@ function scheduleAutoReset() {
   clearAutoResetTimer();
 
   const updateCountdownMessage = (secondsRemaining) => {
+    const message = `Inspection submitted to Google Sheets, PDF generation, and email delivery. Returning to the home screen in ${secondsRemaining} second${secondsRemaining === 1 ? "" : "s"}.`;
+
     statusCard.innerHTML = `
       <strong>Submission Complete</strong>
-      <p>
-        Inspection submitted to Google Sheets, PDF generation, and email delivery.
-        Returning to the home screen in ${secondsRemaining} second${secondsRemaining === 1 ? "" : "s"}.
-      </p>
+      <p>${message}</p>
     `;
+
+    showStatusOverlay({
+      eyebrow: "Submission Complete",
+      title: "Ready for the Next Car",
+      message,
+    });
   };
 
   let secondsRemaining = Math.ceil(AUTO_RESET_DELAY_MS / 1000);
@@ -621,6 +645,11 @@ async function handleSubmit(event) {
   clearAutoResetTimer();
   setWizardDisabledState(true);
   statusCard.innerHTML = "<strong>Submitting...</strong><p>Sending inspection data to Google.</p>";
+  showStatusOverlay({
+    eyebrow: "Submitting",
+    title: "Submitting Inspection",
+    message: "Please wait while the inspection is sent to Google Sheets, PDF generation, and email delivery.",
+  });
 
   try {
     await fetch(config.appsScriptUrl, {
@@ -634,6 +663,7 @@ async function handleSubmit(event) {
     scheduleAutoReset();
   } catch (error) {
     setWizardDisabledState(false);
+    hideStatusOverlay();
     statusCard.innerHTML = `
       <strong>Submission Error</strong>
       <p>${error.message}. The inspection was not sent to Google.</p>

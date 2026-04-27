@@ -236,6 +236,16 @@
       </main>
     </div>
 
+    <div class="status-overlay" id="statusOverlay" hidden aria-live="polite" aria-atomic="true">
+      <div class="status-overlay-card">
+        <p class="status-overlay-eyebrow" id="statusOverlayEyebrow">Processing</p>
+        <h2 id="statusOverlayTitle">Submitting Inspection</h2>
+        <p id="statusOverlayMessage">
+          Please wait while the inspection is sent to Google Sheets, PDF generation, and email delivery.
+        </p>
+      </div>
+    </div>
+
     <script src="./tech-data.js"></script>
     <script src="./app.js"></script>
   </body>
